@@ -111,7 +111,7 @@ if ($distroIsOnline) {
 
     # Create the default user and set as default in wsl.conf
     Write-Host "Creating user '$WslUsername'..."
-    wsl -d $DistroName -- bash -c "
+    wsl -d $DistroName -u root -- bash -c "
         id -u $WslUsername &>/dev/null || useradd -m -s /bin/bash $WslUsername
         usermod -aG sudo $WslUsername
         echo '$WslUsername ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$WslUsername
@@ -148,7 +148,7 @@ exit
 
     # Resize the filesystem inside WSL
     Write-Host "Expanding filesystem inside WSL..."
-    wsl -d $DistroName -- bash -c "sudo resize2fs /dev/sdb 2>/dev/null || true"
+    wsl -d $DistroName -u root -- bash -c "resize2fs /dev/sdb 2>/dev/null || true"
     Write-Host ""
 }
 
@@ -161,7 +161,7 @@ if (-not (Test-Path $dockerDesktopPath)) {
 }
 
 # Ensure git exists inside WSL (run as root, apt needs it)
-wsl -d $DistroName -- bash -c "apt-get update -q && apt-get install -y -q git"
+wsl -d $DistroName -u root -- bash -c "apt-get update -q && apt-get install -y -q git"
 
 # Clone repo and run bootstrap as the WSL user
 wsl -d $DistroName -u $WslUsername -- bash -c "
