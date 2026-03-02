@@ -167,8 +167,9 @@ wsl -d $DistroName -- bash -c "sudo apt update && sudo apt install -y git"
 
 # Clone repo
 wsl -d $DistroName -- bash -c "
-if [ ! -d ~/wsl-bootstrap ]; then
-    git clone $BootstrapRepo ~/wsl-bootstrap
+mkdir -p ~/source/github_personal
+if [ ! -d ~/source/github_personal/wsl-bootstrap ]; then
+    git clone $BootstrapRepo ~/source/github_personal/wsl-bootstrap
 else
     echo 'Repo already exists.'
 fi
@@ -179,7 +180,7 @@ $disablePathEnv = if ($DisableWindowsPath) { "true" } else { "false" }
 $disableMountEnv = if ($DisableAutoMount) { "true" } else { "false" }
 
 wsl -d $DistroName -- bash -c "
-cd ~/wsl-bootstrap/linux &&
+cd ~/source/github_personal/wsl-bootstrap/linux &&
 chmod +x *.sh &&
 DISABLE_WINDOWS_PATH=$disablePathEnv DISABLE_AUTO_MOUNT=$disableMountEnv GITHUB_USER='$GitHubUsername' ./install.sh
 "

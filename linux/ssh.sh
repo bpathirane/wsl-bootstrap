@@ -10,10 +10,15 @@ chmod 700 "$SSH_DIR"
 
 if [ ! -f "$KEY_FILE" ]; then
   ssh-keygen -t ed25519 -C "$(whoami)@wsl" -f "$KEY_FILE" -N ""
+else
+  echo "SSH key exists..."
 fi
 
 chmod 600 "$KEY_FILE"
 chmod 644 "$KEY_FILE.pub"
+
+ssh-keyscan github.com >> "$SSH_DIR/known_hosts" 2>/dev/null
+chmod 644 "$SSH_DIR/known_hosts"
 
 echo ""
 echo "Add this SSH key to GitHub:"

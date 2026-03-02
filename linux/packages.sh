@@ -21,8 +21,7 @@ if [ "$SHELL" != "$(which zsh)" ]; then
   chsh -s "$(which zsh)"
 fi
 
-ensure_directory "$HOME/source"
-ensure_directory "$HOME/projects"
+ensure_directory "$HOME/source/github_personal"
 
 if ! command_exists docker; then
   echo "WARNING: docker CLI not found. Ensure Docker Desktop WSL integration is enabled."

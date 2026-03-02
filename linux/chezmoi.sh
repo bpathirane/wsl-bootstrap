@@ -2,9 +2,10 @@
 set -e
 source "$(dirname "$0")/lib.sh"
 
+export PATH="$HOME/bin:$PATH"
+
 if ! command_exists chezmoi; then
   sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/bin"
-  export PATH="$HOME/bin:$PATH"
 fi
 
 if [ -z "${GITHUB_USER}" ]; then
@@ -17,5 +18,6 @@ if [ ! -d "$HOME/.local/share/chezmoi" ]; then
   read -p "Press ENTER to continue..."
   chezmoi init --apply "git@github.com:${GITHUB_USER}/dotfiles.git"
 else
-  echo "Chezmoi already initialized."
+  echo "Chezmoi already initialized, re-applying dotfiles..."
+  chezmoi apply
 fi
