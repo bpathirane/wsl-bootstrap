@@ -2,11 +2,11 @@
 set -e
 source "$(dirname "$0")/lib.sh"
 
-sudo apt update
+apt_update_if_stale
 
 BASE_PACKAGES=(
-  build-essential curl git unzip jq ripgrep fd-find fzf
-  zsh tmux neovim direnv ca-certificates gnupg lsb-release
+  bat build-essential ca-certificates curl direnv fd-find fzf
+  git gnupg jq lsb-release neovim ripgrep tmux unzip zsh
 )
 
 for pkg in "${BASE_PACKAGES[@]}"; do
