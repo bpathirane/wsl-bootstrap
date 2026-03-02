@@ -131,8 +131,13 @@ if ($distroIsOnline) {
         printf '[user]\ndefault = $WslUsername\n' >> /etc/wsl.conf
     "
 
-    # Set password via chpasswd — pipe through tr to strip Windows \r before chpasswd reads it
-    "${WslUsername}:${plainPass}" | wsl -d $DistroName -u root -- bash -c "tr -d '\r' | chpasswd"
+    # Write the chpasswd input as UTF-8 via .NET to avoid PowerShell pipe encoding issues,
+    # then read it from WSL and delete it immediately.
+    $tempFile = "$env:TEMP\wsl-passwd.tmp"
+    [System.IO.File]::WriteAllText($tempFile, "${WslUsername}:${plainPass}", [System.Text.Encoding]::UTF8)
+    $wslTempFile = (wsl -d $DistroName -u root -- wslpath -u ($tempFile -replace '\\', '/'))
+    wsl -d $DistroName -u root -- bash -c "chpasswd < '$wslTempFile' && rm -f '$wslTempFile'"
+    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host ""
