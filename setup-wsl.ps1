@@ -109,10 +109,18 @@ if ($distroIsOnline) {
 
     Remove-Item $tempTar -Force
 
-    # Prompt for the new user's password
-    $securePass = Read-Host "Enter password for '$WslUsername'" -AsSecureString
-    $plainPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-        [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass))
+    # Prompt for the new user's password with confirmation
+    do {
+        $securePass = Read-Host "Enter password for '$WslUsername'" -AsSecureString
+        $secureConfirm = Read-Host "Confirm password for '$WslUsername'" -AsSecureString
+        $plainPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass))
+        $plainConfirm = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureConfirm))
+        if ($plainPass -ne $plainConfirm) {
+            Write-Warning "Passwords do not match. Please try again."
+        }
+    } while ($plainPass -ne $plainConfirm)
 
     # Create the default user and set as default in wsl.conf
     Write-Host "Creating user '$WslUsername'..."
