@@ -25,6 +25,8 @@ fi
 
 # tree-sitter CLI — used by LazyVim/nvim-treesitter to compile parsers
 if ! command_exists tree-sitter; then
+  npm config set prefix "$HOME/.local"
+  export PATH="$HOME/.local/bin:$PATH"
   npm install -g tree-sitter-cli
 fi
 

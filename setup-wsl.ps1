@@ -1,6 +1,7 @@
 param(
     [string]$DistroName = "Ubuntu-Dev",
     [string]$BaseDistro = "Ubuntu-24.04",  # Base distro to install/clone from (e.g., "Ubuntu-24.04", "Debian")
+    [string]$WslUsername = "buddhi",        # Default Linux user to create inside the instance
     [string]$GitHubUsername = "bpathirane",
     [string]$BootstrapRepoName = "wsl-bootstrap",
     [string]$VhdPath = "",  # Custom path for VHD (e.g., "D:\WSL\Ubuntu-Dev")
@@ -21,6 +22,7 @@ Write-Host "==============================================="
 Write-Host "WSL Bootstrap"
 Write-Host "Instance Name:        $DistroName"
 Write-Host "Base Distro:          $BaseDistro"
+Write-Host "WSL Username:         $WslUsername"
 Write-Host "VHD Location:         $VhdPath"
 Write-Host "VHD Max Size:         $VhdSizeGB GB"
 Write-Host "Disable Windows PATH: $DisableWindowsPath"
@@ -107,12 +109,14 @@ if ($distroIsOnline) {
 
     Remove-Item $tempTar -Force
 
-    # Carry over the default user from the base distro
-    $baseUser = wsl -d $BaseDistro -- bash -c "echo `$USER" 2>$null
-    if ($baseUser) {
-        wsl -d $DistroName -- useradd -m -s /bin/bash $baseUser 2>$null
-        wsl -d $DistroName -- usermod -aG sudo $baseUser 2>$null
-    }
+    # Create the default user and set as default in wsl.conf
+    Write-Host "Creating user '$WslUsername'..."
+    wsl -d $DistroName -- bash -c "
+        id -u $WslUsername &>/dev/null || useradd -m -s /bin/bash $WslUsername
+        usermod -aG sudo $WslUsername
+        echo '$WslUsername ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$WslUsername
+        printf '[user]\ndefault = $WslUsername\n' >> /etc/wsl.conf
+    "
 }
 
 Write-Host ""
@@ -148,12 +152,6 @@ exit
     Write-Host ""
 }
 
-Write-Host "If first install, you may need to create a user."
-Write-Host "Starting WSL instance..."
-wsl -d $DistroName
-Write-Host ""
-Read-Host "Press ENTER to continue with provisioning"
-
 # Docker Desktop check
 $dockerDesktopPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 if (-not (Test-Path $dockerDesktopPath)) {
@@ -162,11 +160,11 @@ if (-not (Test-Path $dockerDesktopPath)) {
     Write-Host "Docker Desktop detected."
 }
 
-# Ensure git exists inside WSL
-wsl -d $DistroName -- bash -c "sudo apt update && sudo apt install -y git"
+# Ensure git exists inside WSL (run as root, apt needs it)
+wsl -d $DistroName -- bash -c "apt-get update -q && apt-get install -y -q git"
 
-# Clone repo
-wsl -d $DistroName -- bash -c "
+# Clone repo and run bootstrap as the WSL user
+wsl -d $DistroName -u $WslUsername -- bash -c "
 mkdir -p ~/source/github_personal
 if [ ! -d ~/source/github_personal/wsl-bootstrap ]; then
     git clone $BootstrapRepo ~/source/github_personal/wsl-bootstrap
@@ -175,11 +173,11 @@ else
 fi
 "
 
-# Run Linux bootstrap
+# Run Linux bootstrap as the WSL user
 $disablePathEnv = if ($DisableWindowsPath) { "true" } else { "false" }
 $disableMountEnv = if ($DisableAutoMount) { "true" } else { "false" }
 
-wsl -d $DistroName -- bash -c "
+wsl -d $DistroName -u $WslUsername -- bash -c "
 cd ~/source/github_personal/wsl-bootstrap/linux &&
 chmod +x *.sh &&
 DISABLE_WINDOWS_PATH=$disablePathEnv DISABLE_AUTO_MOUNT=$disableMountEnv GITHUB_USER='$GitHubUsername' ./install.sh
