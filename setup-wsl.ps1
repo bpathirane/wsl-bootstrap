@@ -109,19 +109,6 @@ if ($distroIsOnline) {
 
     Remove-Item $tempTar -Force
 
-    # Prompt for the new user's password with confirmation
-    do {
-        $securePass = Read-Host "Enter password for '$WslUsername'" -AsSecureString
-        $secureConfirm = Read-Host "Confirm password for '$WslUsername'" -AsSecureString
-        $plainPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass))
-        $plainConfirm = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureConfirm))
-        if ($plainPass -ne $plainConfirm) {
-            Write-Warning "Passwords do not match. Please try again."
-        }
-    } while ($plainPass -ne $plainConfirm)
-
     # Create the default user and set as default in wsl.conf
     Write-Host "Creating user '$WslUsername'..."
     wsl -d $DistroName -u root -- bash -c "
@@ -131,13 +118,9 @@ if ($distroIsOnline) {
         printf '[user]\ndefault = $WslUsername\n' >> /etc/wsl.conf
     "
 
-    # Write the chpasswd input as UTF-8 via .NET to avoid PowerShell pipe encoding issues,
-    # then read it from WSL and delete it immediately.
-    $tempFile = "$env:TEMP\wsl-passwd.tmp"
-    [System.IO.File]::WriteAllText($tempFile, "${WslUsername}:${plainPass}", [System.Text.Encoding]::UTF8)
-    $wslTempFile = (wsl -d $DistroName -u root -- wslpath -u ($tempFile -replace '\\', '/'))
-    wsl -d $DistroName -u root -- bash -c "chpasswd < '$wslTempFile' && rm -f '$wslTempFile'"
-    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+    # Set password interactively inside WSL so Linux handles the prompt natively
+    Write-Host "Set password for '$WslUsername':"
+    wsl -d $DistroName -u root -- passwd $WslUsername
 }
 
 Write-Host ""
