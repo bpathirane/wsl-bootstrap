@@ -109,6 +109,11 @@ if ($distroIsOnline) {
 
     Remove-Item $tempTar -Force
 
+    # Prompt for the new user's password
+    $securePass = Read-Host "Enter password for '$WslUsername'" -AsSecureString
+    $plainPass = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+        [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePass))
+
     # Create the default user and set as default in wsl.conf
     Write-Host "Creating user '$WslUsername'..."
     wsl -d $DistroName -u root -- bash -c "
@@ -117,6 +122,9 @@ if ($distroIsOnline) {
         echo '$WslUsername ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/$WslUsername
         printf '[user]\ndefault = $WslUsername\n' >> /etc/wsl.conf
     "
+
+    # Set password via chpasswd (avoids passing it through shell args)
+    "${WslUsername}:${plainPass}" | wsl -d $DistroName -u root -- chpasswd
 }
 
 Write-Host ""
