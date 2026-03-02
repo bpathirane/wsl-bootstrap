@@ -131,8 +131,8 @@ if ($distroIsOnline) {
         printf '[user]\ndefault = $WslUsername\n' >> /etc/wsl.conf
     "
 
-    # Set password via chpasswd (avoids passing it through shell args)
-    "${WslUsername}:${plainPass}" | wsl -d $DistroName -u root -- chpasswd
+    # Set password via chpasswd — pipe through tr to strip Windows \r before chpasswd reads it
+    "${WslUsername}:${plainPass}" | wsl -d $DistroName -u root -- bash -c "tr -d '\r' | chpasswd"
 }
 
 Write-Host ""
