@@ -33,8 +33,6 @@ if [ ! -d "$HOME/.config/nvim" ]; then
   echo "Installing LazyVim starter..."
   git clone https://github.com/LazyVim/starter "$HOME/.config/nvim"
   rm -rf "$HOME/.config/nvim/.git"
-  echo "Bootstrapping LazyVim plugins (headless)..."
-  nvim --headless "+Lazy! sync" +qa 2>/dev/null || true
 else
   echo "Neovim config already exists, skipping LazyVim starter."
 fi
