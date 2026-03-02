@@ -90,6 +90,46 @@ powershell -ExecutionPolicy Bypass -File $temp `
 
 ---
 
+## WSL Configuration
+
+By default, this script creates an isolated WSL environment:
+- **Windows PATH disabled** - Prevents Windows executables from appearing in WSL `$PATH`
+- **Auto-mount disabled** - Windows drives (C:, D:, etc.) are not automatically mounted
+
+### Enable Windows PATH
+
+To include Windows executables in WSL PATH:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File $temp -DisableWindowsPath $false
+```
+
+### Enable Windows Drive Auto-Mount
+
+To automatically mount Windows drives at `/mnt/c`, `/mnt/d`, etc.:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File $temp -DisableAutoMount $false
+```
+
+### Enable Both
+
+For full Windows integration:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File $temp `
+  -DisableWindowsPath $false `
+  -DisableAutoMount $false
+```
+
+**Why disable by default?**
+- **Cleaner PATH**: No Windows executables cluttering your Linux environment
+- **Faster startup**: Reduces WSL initialization time
+- **Better isolation**: True Linux development environment
+- **Fewer conflicts**: Prevents accidental execution of Windows versions of tools
+
+---
+
 ## Rebuild Mode
 
 Destroys and recreates the instance (⚠️ **WARNING: deletes all data**):
@@ -191,6 +231,38 @@ Remove-Item D:\temp\ubuntu-dev.tar
 
 ---
 
+## Modify WSL Configuration After Installation
+
+To change WSL settings on an existing instance, edit `/etc/wsl.conf` inside WSL:
+
+```bash
+# Inside WSL
+sudo nano /etc/wsl.conf
+```
+
+**Enable/Disable Windows PATH:**
+```ini
+[interop]
+enabled = true
+appendWindowsPath = false  # Change to true to enable
+```
+
+**Enable/Disable Auto-Mount:**
+```ini
+[automount]
+enabled = false  # Change to true to enable
+root = /mnt/
+options = "metadata,umask=22,fmask=11"
+```
+
+After editing, restart WSL:
+```powershell
+wsl --shutdown
+wsl -d Ubuntu-Dev
+```
+
+---
+
 ## Full Reset
 
 Remove a WSL instance completely:
@@ -237,7 +309,7 @@ wsl --update
 
 ### Example Workflows
 
-**Create development environment on D: drive:**
+**Create isolated development environment on D: drive:**
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
   -DistroName "Dev" `
@@ -245,19 +317,28 @@ powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
   -VhdSizeGB 512
 ```
 
+**Create environment with Windows integration:**
+```powershell
+powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
+  -DistroName "Integrated-Dev" `
+  -DisableWindowsPath $false `
+  -DisableAutoMount $false
+```
+
 **Create multiple project-specific environments:**
 ```powershell
-# Frontend development
+# Frontend development (isolated)
 powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
   -DistroName "Frontend-Dev" `
   -VhdPath "D:\WSL\Frontend"
 
-# Backend development
+# Backend development (with Windows tools access)
 powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
   -DistroName "Backend-Dev" `
-  -VhdPath "D:\WSL\Backend"
+  -VhdPath "D:\WSL\Backend" `
+  -DisableWindowsPath $false
 
-# Machine learning (large VHD)
+# Machine learning (large VHD, isolated)
 powershell -ExecutionPolicy Bypass -File setup-wsl.ps1 `
   -DistroName "ML-Dev" `
   -VhdPath "E:\WSL\ML" `

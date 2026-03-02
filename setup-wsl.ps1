@@ -4,6 +4,8 @@ param(
     [string]$BootstrapRepoName = "wsl-bootstrap",
     [string]$VhdPath = "",  # Custom path for VHD (e.g., "D:\WSL\Ubuntu-Dev")
     [int]$VhdSizeGB = 256,  # Max VHD size in GB (default: 256GB)
+    [bool]$DisableWindowsPath = $true,   # Disable Windows PATH injection (default: disabled)
+    [bool]$DisableAutoMount = $true,     # Disable auto-mounting Windows drives (default: disabled)
     [switch]$Rebuild
 )
 
@@ -16,10 +18,12 @@ if ([string]::IsNullOrEmpty($VhdPath)) {
 
 Write-Host "==============================================="
 Write-Host "WSL Bootstrap"
-Write-Host "Instance Name: $DistroName"
-Write-Host "VHD Location:  $VhdPath"
-Write-Host "VHD Max Size:  $VhdSizeGB GB"
-Write-Host "Repo:          $BootstrapRepo"
+Write-Host "Instance Name:        $DistroName"
+Write-Host "VHD Location:         $VhdPath"
+Write-Host "VHD Max Size:         $VhdSizeGB GB"
+Write-Host "Disable Windows PATH: $DisableWindowsPath"
+Write-Host "Disable Auto-Mount:   $DisableAutoMount"
+Write-Host "Repo:                 $BootstrapRepo"
 Write-Host "==============================================="
 Write-Host ""
 
@@ -158,11 +162,26 @@ fi
 "
 
 # Run Linux bootstrap
+$disablePathEnv = if ($DisableWindowsPath) { "true" } else { "false" }
+$disableMountEnv = if ($DisableAutoMount) { "true" } else { "false" }
+
 wsl -d $DistroName -- bash -c "
 cd ~/wsl-bootstrap/linux &&
 chmod +x *.sh &&
-./install.sh
+DISABLE_WINDOWS_PATH=$disablePathEnv DISABLE_AUTO_MOUNT=$disableMountEnv ./install.sh
 "
 
 Write-Host ""
-Write-Host "Provisioning complete."
+Write-Host "==============================================="
+Write-Host "Provisioning complete!"
+Write-Host "==============================================="
+
+if ($DisableWindowsPath -or $DisableAutoMount) {
+    Write-Host ""
+    Write-Host "IMPORTANT: WSL configuration was modified."
+    Write-Host "Please restart WSL for changes to take effect:"
+    Write-Host ""
+    Write-Host "  wsl --shutdown"
+    Write-Host "  wsl -d $DistroName"
+    Write-Host ""
+}

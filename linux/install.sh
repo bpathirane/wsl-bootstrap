@@ -5,6 +5,9 @@ source "$SCRIPT_DIR/lib.sh"
 
 echo "Starting WSL bootstrap..."
 
+# Configure WSL settings first
+"$SCRIPT_DIR/wsl-config.sh"
+
 "$SCRIPT_DIR/packages.sh"
 "$SCRIPT_DIR/aws.sh"
 "$SCRIPT_DIR/k8s.sh"
