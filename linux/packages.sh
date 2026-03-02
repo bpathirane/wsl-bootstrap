@@ -17,6 +17,13 @@ if ! command_exists starship; then
   curl -sS https://starship.rs/install.sh | sh -s -- -y
 fi
 
+# Wire starship into bash login shells via profile.d.
+# Zsh init (eval "$(starship init zsh)") should live in your chezmoi-managed .zshrc.
+if command_exists starship && [ ! -f /etc/profile.d/starship.sh ]; then
+  echo 'eval "$(starship init bash)"' | sudo tee /etc/profile.d/starship.sh > /dev/null
+  sudo chmod +x /etc/profile.d/starship.sh
+fi
+
 if [ "$SHELL" != "$(which zsh)" ]; then
   chsh -s "$(which zsh)"
 fi

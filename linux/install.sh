@@ -14,6 +14,7 @@ echo "Starting WSL bootstrap..."
 "$SCRIPT_DIR/github.sh"
 "$SCRIPT_DIR/ssh.sh"
 "$SCRIPT_DIR/lazyvim.sh"
+"$SCRIPT_DIR/claude.sh"
 "$SCRIPT_DIR/chezmoi.sh"
 
 echo "Bootstrap complete."
