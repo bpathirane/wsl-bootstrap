@@ -1,5 +1,6 @@
 param(
     [string]$DistroName = "Ubuntu-Dev",
+    [string]$BaseDistro = "Ubuntu-24.04",  # Base distro to install/clone from (e.g., "Ubuntu-24.04", "Debian")
     [string]$GitHubUsername = "bpathirane",
     [string]$BootstrapRepoName = "wsl-bootstrap",
     [string]$VhdPath = "",  # Custom path for VHD (e.g., "D:\WSL\Ubuntu-Dev")
@@ -19,6 +20,7 @@ if ([string]::IsNullOrEmpty($VhdPath)) {
 Write-Host "==============================================="
 Write-Host "WSL Bootstrap"
 Write-Host "Instance Name:        $DistroName"
+Write-Host "Base Distro:          $BaseDistro"
 Write-Host "VHD Location:         $VhdPath"
 Write-Host "VHD Max Size:         $VhdSizeGB GB"
 Write-Host "Disable Windows PATH: $DisableWindowsPath"
@@ -55,25 +57,38 @@ if ($Rebuild) {
 Write-Host "Setting up WSL instance '$DistroName'..."
 Write-Host ""
 
-# Check if we need to create a custom-named instance
-$standardDistros = @("Ubuntu", "Debian", "Ubuntu-24.04", "Ubuntu-22.04", "Ubuntu-20.04")
-$isStandardName = $standardDistros -contains $DistroName
+# Discover directly installable distros from the WSL online catalog
+Write-Host "Checking available WSL distros..."
+$onlineDistros = @()
+$headerFound = $false
+foreach ($line in (wsl --list --online 2>$null)) {
+    if ($line -match '^NAME\s+') { $headerFound = $true; continue }
+    if ($headerFound -and $line.Trim() -ne '') {
+        $onlineDistros += ($line.Trim() -split '\s+')[0]
+    }
+}
 
-if ($isStandardName) {
-    # Standard distro - use wsl --install
-    Write-Host "Installing standard distro: $DistroName"
-    wsl --install -d $DistroName 2>$null
+$distroIsOnline = $onlineDistros -contains $DistroName
+
+if ($distroIsOnline) {
+    # DistroName is a known WSL distro — install it directly, no export/import needed
+    Write-Host "Installing $DistroName from WSL catalog..."
+    wsl --install -d $DistroName
 } else {
-    # Custom name - need to import from a base distro
-    Write-Host "Creating custom instance from Ubuntu base..."
+    # Custom name — clone from BaseDistro via export/import
+    if ($onlineDistros.Count -gt 0 -and -not ($onlineDistros -contains $BaseDistro)) {
+        Write-Error "Base distro '$BaseDistro' is not available in the WSL online catalog."
+        Write-Host "Available distros: $($onlineDistros -join ', ')"
+        exit 1
+    }
 
-    # Ensure base Ubuntu is available
-    $baseDistro = "Ubuntu"
-    $baseExists = (wsl --list --quiet) -match [regex]::Escape($baseDistro)
+    Write-Host "Creating custom instance '$DistroName' from $BaseDistro base..."
 
+    # Ensure base distro is installed locally
+    $baseExists = (wsl --list --quiet) -match [regex]::Escape($BaseDistro)
     if (-not $baseExists) {
-        Write-Host "Installing base Ubuntu distro first..."
-        wsl --install -d Ubuntu
+        Write-Host "Installing base $BaseDistro first..."
+        wsl --install -d $BaseDistro
     }
 
     # Create instance directory
@@ -82,23 +97,21 @@ if ($isStandardName) {
         New-Item -ItemType Directory -Path $VhdPath -Force | Out-Null
     }
 
-    # Export and import to create named instance
+    # Export base distro and import under the custom name
     $tempTar = "$env:TEMP\wsl-export-$DistroName.tar"
-    Write-Host "Exporting base Ubuntu..."
-    wsl --export $baseDistro $tempTar
+    Write-Host "Exporting $BaseDistro..."
+    wsl --export $BaseDistro $tempTar
 
     Write-Host "Importing as '$DistroName' to $VhdPath..."
     wsl --import $DistroName $VhdPath $tempTar
 
     Remove-Item $tempTar -Force
 
-    # Set default user (if base Ubuntu had one)
-    $baseUser = wsl -d $baseDistro -- bash -c "echo `$USER" 2>$null
+    # Carry over the default user from the base distro
+    $baseUser = wsl -d $BaseDistro -- bash -c "echo `$USER" 2>$null
     if ($baseUser) {
         wsl -d $DistroName -- useradd -m -s /bin/bash $baseUser 2>$null
         wsl -d $DistroName -- usermod -aG sudo $baseUser 2>$null
-        # Set default user for this distro
-        ubuntu config --default-user $baseUser 2>$null
     }
 }
 
@@ -168,7 +181,7 @@ $disableMountEnv = if ($DisableAutoMount) { "true" } else { "false" }
 wsl -d $DistroName -- bash -c "
 cd ~/wsl-bootstrap/linux &&
 chmod +x *.sh &&
-DISABLE_WINDOWS_PATH=$disablePathEnv DISABLE_AUTO_MOUNT=$disableMountEnv ./install.sh
+DISABLE_WINDOWS_PATH=$disablePathEnv DISABLE_AUTO_MOUNT=$disableMountEnv GITHUB_USER='$GitHubUsername' ./install.sh
 "
 
 Write-Host ""
