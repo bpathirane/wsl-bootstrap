@@ -38,6 +38,7 @@ fi
 "$SCRIPT_DIR/k8s.sh"
 "$SCRIPT_DIR/github.sh"
 "$SCRIPT_DIR/ssh.sh"
+"$SCRIPT_DIR/win32yank.sh"
 "$SCRIPT_DIR/lazyvim.sh"
 "$SCRIPT_DIR/claude.sh"
 "$SCRIPT_DIR/chezmoi.sh"
