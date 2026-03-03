@@ -9,7 +9,8 @@ Automates creation and provisioning of named WSL2 Ubuntu instances on Windows. T
 ## Entry Points
 
 - **`setup-wsl.ps1`** — Windows entry point. Accepts params: `-DistroName`, `-VhdPath`, `-VhdSizeGB`, `-DisableWindowsPath`, `-DisableAutoMount`, `-Rebuild`, `-GitHubUsername`, `-BootstrapRepoName`. Clones this repo inside the new WSL instance and calls `linux/install.sh`.
-- **`linux/install.sh`** — Linux entry point. Runs sequentially: `wsl-config.sh` → `packages.sh` → `aws.sh` → `k8s.sh` → `github.sh` → `ssh.sh` → `chezmoi.sh`.
+- **`linux/install.sh`** — Linux entry point. Runs sequentially: `wsl-config.sh` → `install-packages.sh` (apt only) → starship/zsh/docker setup (inlined) → `aws.sh` → `k8s.sh` → `github.sh` → `ssh.sh` → `lazyvim.sh` → `claude.sh` → `chezmoi.sh`.
+- **`linux/install-packages.sh`** — Apt package installs only. Called by `install.sh` and can be run standalone by `/wsl-install` for adding individual packages without triggering the full bootstrap.
 - **`manage-vhd.ps1`** — Standalone VHD management utility. Actions: `Info`, `Compact`, `Resize`, `Move`.
 
 ## Linux Script Architecture

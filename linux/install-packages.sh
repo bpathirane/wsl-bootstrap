@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+apt_update_if_stale
+
+BASE_PACKAGES=(
+  bat build-essential ca-certificates curl direnv fd-find fzf
+  git gnupg jq lsb-release neovim ripgrep tmux unzip zsh
+)
+
+for pkg in "${BASE_PACKAGES[@]}"; do
+  apt_install_if_missing "$pkg"
+done

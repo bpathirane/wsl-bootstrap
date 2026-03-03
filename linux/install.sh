@@ -8,7 +8,32 @@ echo "Starting WSL bootstrap..."
 # Configure WSL settings first
 "$SCRIPT_DIR/wsl-config.sh"
 
-"$SCRIPT_DIR/packages.sh"
+# Install apt packages
+"$SCRIPT_DIR/install-packages.sh"
+
+# Starship prompt
+if ! command_exists starship; then
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+fi
+# Wire starship into bash login shells via profile.d.
+# Zsh init (eval "$(starship init zsh)") should live in your chezmoi-managed .zshrc.
+if command_exists starship && [ ! -f /etc/profile.d/starship.sh ]; then
+  echo 'eval "$(starship init bash)"' | sudo tee /etc/profile.d/starship.sh > /dev/null
+  sudo chmod +x /etc/profile.d/starship.sh
+fi
+
+# Set zsh as default shell
+if [ "$SHELL" != "$(which zsh)" ]; then
+  chsh -s "$(which zsh)"
+fi
+
+ensure_directory "$HOME/source/github_personal"
+
+if ! command_exists docker; then
+  echo "WARNING: docker CLI not found. Ensure Docker Desktop WSL integration is enabled."
+fi
+
+# Tool installs
 "$SCRIPT_DIR/aws.sh"
 "$SCRIPT_DIR/k8s.sh"
 "$SCRIPT_DIR/github.sh"
