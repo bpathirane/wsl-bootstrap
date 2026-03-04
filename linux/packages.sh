@@ -5,7 +5,7 @@ source "$(dirname "$0")/lib.sh"
 apt_update_if_stale
 
 BASE_PACKAGES=(
-  bat build-essential ca-certificates curl direnv fd-find fzf
+  bat build-essential ca-certificates curl direnv fd-find
   git gnupg jq lsb-release neovim ripgrep tmux unzip zsh
 )
 
