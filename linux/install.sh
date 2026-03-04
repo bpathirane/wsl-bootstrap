@@ -11,6 +11,9 @@ echo "Starting WSL bootstrap..."
 # Install apt packages
 "$SCRIPT_DIR/install-packages.sh"
 
+# tmux from source (needs build-essential, libevent-dev, ncurses-dev from apt)
+"$SCRIPT_DIR/tmux.sh"
+
 # Starship prompt
 if ! command_exists starship; then
   curl -sS https://starship.rs/install.sh | sh -s -- -y
