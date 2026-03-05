@@ -47,7 +47,7 @@ else
     CONFIG+="[automount]\n"
     CONFIG+="enabled = true\n"
     CONFIG+="root = /mnt/\n"
-    CONFIG+="options = \"metadata,umask=22,fmask=11\"\n"
+    CONFIG+="options = \"metadata,umask=22\"\n"
     CONFIG+="\n"
 fi
 
