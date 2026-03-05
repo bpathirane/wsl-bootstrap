@@ -37,6 +37,7 @@ if ! command_exists docker; then
 fi
 
 # Tool installs
+"$SCRIPT_DIR/azure-cli.sh"
 "$SCRIPT_DIR/aws.sh"
 "$SCRIPT_DIR/k8s.sh"
 "$SCRIPT_DIR/github.sh"
