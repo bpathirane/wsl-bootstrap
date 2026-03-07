@@ -2,10 +2,8 @@
 set -e
 source "$(dirname "$0")/lib.sh"
 
-export PATH="$HOME/bin:$PATH"
-
 if ! command_exists chezmoi; then
-  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/bin"
+  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin
 fi
 
 if [ -z "${GITHUB_USER}" ]; then

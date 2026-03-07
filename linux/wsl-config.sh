@@ -56,6 +56,11 @@ CONFIG+="[boot]\n"
 CONFIG+="systemd = true\n"
 CONFIG+="\n"
 
+# Add user section so the default user is preserved after rewrite
+CONFIG+="[user]\n"
+CONFIG+="default = $(whoami)\n"
+CONFIG+="\n"
+
 # Add network section
 CONFIG+="[network]\n"
 CONFIG+="generateResolvConf = true\n"
