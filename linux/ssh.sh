@@ -71,3 +71,16 @@ cat "$SSH_DIR/id_rsa_azdo.pub"
 echo "========================================"
 echo ""
 read -p "Press ENTER after adding all keys to their respective accounts..."
+
+# ── Switch bootstrap repo remote to SSH ───────────────────────────────────────
+BOOTSTRAP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+if [ -d "$BOOTSTRAP_DIR/.git" ]; then
+  current_remote="$(git -C "$BOOTSTRAP_DIR" remote get-url origin 2>/dev/null || true)"
+  if echo "$current_remote" | grep -q "^https://github.com/"; then
+    ssh_remote="$(echo "$current_remote" | sed 's|https://github.com/|git@github.com:|')"
+    git -C "$BOOTSTRAP_DIR" remote set-url origin "$ssh_remote"
+    echo "Switched bootstrap remote: $current_remote → $ssh_remote"
+  else
+    echo "Bootstrap remote already using SSH: $current_remote"
+  fi
+fi
