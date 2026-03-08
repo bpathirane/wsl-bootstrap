@@ -69,6 +69,24 @@ CONFIG+="\n"
 # Write configuration
 echo -e "$CONFIG" | sudo tee /etc/wsl.conf > /dev/null
 
+# Symlink Windows tools required by wslview into /usr/local/bin
+# (avoids appendWindowsPath while keeping wslview functional)
+if [ -d /mnt/c/Windows/System32 ]; then
+    echo "  - Symlinking Windows tools for wslview..."
+    sudo ln -sf /mnt/c/Windows/System32/reg.exe /usr/local/bin/reg.exe
+    sudo ln -sf /mnt/c/Windows/System32/chcp.com /usr/local/bin/chcp.com
+    sudo ln -sf /mnt/c/Windows/System32/clip.exe /usr/local/bin/clip.exe
+    # PowerShell 7 (pwsh.exe) — prefer over legacy Windows PowerShell 1.0
+    PWSH7="$(ls -d /mnt/c/Program\ Files/PowerShell/7/pwsh.exe 2>/dev/null | head -1)"
+    if [ -n "$PWSH7" ]; then
+        sudo ln -sf "$PWSH7" /usr/local/bin/pwsh.exe
+    else
+        sudo ln -sf "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe" /usr/local/bin/pwsh.exe
+    fi
+else
+    echo "  - /mnt/c not mounted yet; wslview symlinks will be created on next run after WSL restart"
+fi
+
 echo "WSL configuration updated."
 echo ""
 echo "Current /etc/wsl.conf:"

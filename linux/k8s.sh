@@ -17,3 +17,11 @@ fi
 if ! command_exists k9s; then
   curl -sS https://webinstall.dev/k9s | bash
 fi
+
+if ! command_exists helm; then
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+fi
+
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+chmod +x ./kind
+sudo mv ./kind /usr/local/bin/kind

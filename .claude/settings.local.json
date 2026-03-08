@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git config --list --show-origin 2>/dev/null | grep -i credential)"
     ]
   }
 }

@@ -45,6 +45,8 @@ fi
 "$SCRIPT_DIR/win32yank.sh"
 "$SCRIPT_DIR/fzf.sh"
 "$SCRIPT_DIR/lazygit.sh"
+"$SCRIPT_DIR/yazi.sh"
+"$SCRIPT_DIR/tldr.sh"
 "$SCRIPT_DIR/zoxide.sh"
 "$SCRIPT_DIR/lazyvim.sh"
 "$SCRIPT_DIR/claude.sh"
