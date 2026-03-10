@@ -137,6 +137,7 @@ check_tool "direnv"    direnv      "direnv --version"                          "
 check_tool "sops"      sops        "sops --version"                            ""       "$SCRIPT_DIR/sops.sh"
 check_tool_min "yazi"      yazi        "yazi --version"                            "$YAZI_VERSION"     "$SCRIPT_DIR/yazi.sh"
 check_tool_min "tldr"      tldr        "tldr --version"                            "$TLDR_VERSION"     "$SCRIPT_DIR/tldr.sh"
+check_tool "bun"       bun         "bun --version"                             ""       "$SCRIPT_DIR/bun.sh"
 check_tool "jq"        jq          "jq --version"                              ""       "$SCRIPT_DIR/install-packages.sh"
 check_tool "win32yank" win32yank.exe "echo WSL clipboard provider"             ""       "$SCRIPT_DIR/win32yank.sh"
 
