@@ -5,7 +5,7 @@ source "$(dirname "$0")/lib.sh"
 apt_update_if_stale
 
 BASE_PACKAGES=(
-  bat bison build-essential ca-certificates curl direnv fd-find
+  age bat bison build-essential ca-certificates curl direnv fd-find
   git gnupg htop jq libevent-dev lsb-release ncurses-dev pkg-config ripgrep unzip wslu zsh
 )
 
