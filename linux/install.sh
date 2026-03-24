@@ -51,6 +51,7 @@ fi
 "$SCRIPT_DIR/lazyvim.sh"
 "$SCRIPT_DIR/bun.sh"
 "$SCRIPT_DIR/claude.sh"
+"$SCRIPT_DIR/powershell.sh"
 "$SCRIPT_DIR/sops.sh"
 "$SCRIPT_DIR/lefthook.sh"
 "$SCRIPT_DIR/chezmoi.sh"
