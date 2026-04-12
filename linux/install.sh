@@ -54,6 +54,7 @@ fi
 "$SCRIPT_DIR/powershell.sh"
 "$SCRIPT_DIR/sops.sh"
 "$SCRIPT_DIR/lefthook.sh"
+"$SCRIPT_DIR/zellij.sh"
 "$SCRIPT_DIR/chezmoi.sh"
 
 echo "Bootstrap complete."
