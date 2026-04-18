@@ -11,7 +11,8 @@ ssh-keyscan ssh.dev.azure.com >> "$SSH_DIR/known_hosts" 2>/dev/null
 chmod 644 "$SSH_DIR/known_hosts"
 
 # ── SSH config ────────────────────────────────────────────────────────────────
-cat > "$SSH_DIR/config" << 'EOF'
+if [ ! -f "$SSH_DIR/config" ]; then
+  cat > "$SSH_DIR/config" << 'EOF'
 # Personal GitHub
 Host github.com
     HostName github.com
@@ -33,6 +34,10 @@ Host ssh.dev.azure.com
     IdentityFile ~/.ssh/id_rsa_azdo
     IdentitiesOnly yes
 EOF
+  echo "SSH config written."
+else
+  echo "~/.ssh/config already exists, skipping."
+fi
 chmod 600 "$SSH_DIR/config"
 
 # ── Key generation ────────────────────────────────────────────────────────────

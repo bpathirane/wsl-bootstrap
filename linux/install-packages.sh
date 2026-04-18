@@ -2,6 +2,8 @@
 set -e
 source "$(dirname "$0")/lib.sh"
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt_update_if_stale
 
 BASE_PACKAGES=(

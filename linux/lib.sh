@@ -6,7 +6,7 @@ command_exists() {
 
 apt_install_if_missing() {
   if ! dpkg -s "$1" >/dev/null 2>&1; then
-    sudo apt install -y "$1"
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y "$1"
   fi
 }
 
