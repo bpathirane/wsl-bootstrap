@@ -75,7 +75,9 @@ echo "── Azure DevOps ──────────────────
 cat "$SSH_DIR/id_rsa_azdo.pub"
 echo "========================================"
 echo ""
-read -p "Press ENTER after adding all keys to their respective accounts..."
+if [ -t 0 ]; then
+  read -p "Press ENTER after adding all keys to their respective accounts..."
+fi
 
 # ── Switch bootstrap repo remote to SSH ───────────────────────────────────────
 BOOTSTRAP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
